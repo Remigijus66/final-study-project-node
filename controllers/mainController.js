@@ -1,11 +1,10 @@
 const bcrypt = require("bcrypt");
 const { uid } = require('uid');
 const session = require("express-session");
-// const auctionSchema = require("../schemas/auctionSchema");
-// const forumCommentsSchema = require("../schemas/forumCommentsSchema");
-// const forumDiscussionSchema = require("../schemas/forumDiscussionSchema");
+
 
 const edatingUserSchema = require("../schemas/edatingUserSchema");
+const edatingLikesSchema = require("../schemas/edatingLikesSchema");
 
 
 
@@ -18,7 +17,6 @@ module.exports = {
         const secret = uid(30)
         const user = new edatingUserSchema({ name, pass: hash, secret, sex, age, city })
         await user.save()
-        // req.session.name = name;
         res.send({ error: false, message: 'user registered', data: user })
     },
 
@@ -71,48 +69,110 @@ module.exports = {
         res.send({ error: false, message: 'data updated', data: user })
 
     },
-    // createDiscussion: async (req, res) => {
-    //     const { author, topic, title, description, date } = req.body
-    //     const name = req.session.name
-    //     if (!name) return res.send({ error: true, message: 'you are not logged in', data: null })
-    //     const discussion = new forumDiscussionSchema({ author, topic, title, description, date })
-    //     console.log(discussion)
-    //     await discussion.save()
-    //     console.log('new discusssion saved')
-    //     res.send({ error: false, message: 'new discusssion saved', data: discussion })
 
-    // },
-    // addMessageCounter: async (req, res) => {
-    //     const { name } = req.body
-    //     console.log('message counter', req.body)
-    //     const user = await forumUserSchema.findOneAndUpdate({ name }, { $inc: { messages: 1 } }, { returnDocument: "after" })
-    //     res.send({ error: false, message: 'message counter added', data: user })
-    // },
-    // getDiscussions: async (req, res) => {
-    //     const { topic } = req.body
-    //     const discussions = await forumDiscussionSchema.find({ topic: topic })
-    //     res.send({ error: false, message: 'discussions', data: discussions })
-    // },
-    // createComment: async (req, res) => {
-    //     const { author, discussion, inReply, text, photo, video, time, originalComment } = req.body
-    //     const comment = new forumCommentsSchema({ author, discussion, inReply, text, photo, video, time, originalComment })
-    //     await comment.save()
-    //     res.send({ error: false, message: 'comment added', data: comment })
-    //     console.log(req.body)
-    // },
-    // getComments: async (req, res) => {
-    //     const { discussion, commentsIndex } = req.body
-    //     // find().skip(20).limit(10)
-    //     const comments = await forumCommentsSchema.find({ discussion: discussion }).skip(commentsIndex - 1).limit(5)
+    addLike: async (req, res) => {
+        const { author, liked } = req.body
+        const like = new edatingLikesSchema({ author, liked })
+        await like.save()
+        res.send({ error: false, message: 'like added', data: null })
+    },
 
-    //     console.log('comments=> ', comments)
-    //     res.send({ error: false, message: 'comments', data: comments })
-    // },
 
-    // getUsers: async (req, res) => {
-    //     const users = await forumUserSchema.find()
-    //     res.send({ error: false, message: 'comments', data: users })
-    // },
+    getList: async (req, res) => {
+        const { sex, city, minAge, maxAge, name } = req.body
+        console.log('name', name);
 
+        const users = await edatingUserSchema.aggregate(
+            [
+                {
+                    '$match': {
+                        name: { $ne: name }, sex: sex, city: city, age: { $gte: minAge * 1, $lte: maxAge * 1 }
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'edatinglikes',
+                        'let': {
+                            'user_name': '$name'
+                        },
+                        'pipeline': [
+                            {
+                                '$match': {
+                                    '$expr': {
+                                        '$and': [
+                                            {
+                                                '$eq': [
+                                                    name, '$author'
+                                                ]
+                                            }, {
+                                                '$eq': [
+                                                    '$$user_name', '$liked'
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        ],
+                        'as': 'collectedlikes'
+                    }
+                }, {
+                    '$match': {
+                        'collectedlikes': {
+                            '$exists': true,
+                            '$size': 0
+                        }
+                    }
+                }
+            ]
+        )
+        // console.log('users', users)
+        res.send({ error: false, message: 'selectedUsers', data: users })
+    },
+
+    likedMe: async (req, res) => {
+        const { name } = req.body
+
+        const users = await edatingLikesSchema.aggregate(
+            [
+                {
+                    '$match': {
+                        'liked': name
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'edatingusers',
+                        'localField': 'author',
+                        'foreignField': 'name',
+                        'as': 'person'
+                    }
+                }
+            ]
+        )
+        console.log(users)
+        res.send({ error: false, message: 'likedMe', data: users })
+    },
+
+    iLiked: async (req, res) => {
+        const { name } = req.body
+
+        const users = await edatingLikesSchema.aggregate(
+            [
+                {
+                    '$match': {
+                        'author': name
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'edatingusers',
+                        'localField': 'liked',
+                        'foreignField': 'name',
+                        'as': 'person'
+                    }
+                }
+            ]
+        )
+        console.log(users)
+        res.send({ error: false, message: 'likedMe', data: users })
+    }
 
 }

@@ -20,7 +20,6 @@ const edatingUserSchema = new Schema({
     required: false,
   },
 
-
   sex: {
     type: String,
     required: true

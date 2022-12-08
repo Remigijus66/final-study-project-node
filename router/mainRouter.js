@@ -9,11 +9,11 @@ const {
     logout,
     updateprofile,
     // createDiscussion,
-    // addMessageCounter,
-    // getDiscussions,
-    // createComment,
+    addLike,
+    likedMe,
+    iLiked,
     // getComments,
-    // getUsers,
+    getList,
 
 } = require("../controllers/mainController")
 
@@ -23,11 +23,11 @@ router.post('/autologin', autologin)
 router.post('/logout', logout)
 router.post('/updateprofile', validateUpdate, updateprofile)
 // router.post('/createDiscussion', validateDiscussion, createDiscussion)
-// router.post('/addMessageCounter', addMessageCounter)
-// router.post('/getDiscussions', getDiscussions)
-// router.post('/createComment', validateComment, createComment)
+router.post('/addLike', addLike)
+router.post('/likedMe', likedMe)
+router.post('/iLiked', iLiked)
 // router.post('/getComments', getComments)
-// router.post('/getUsers', getUsers)
+router.post('/getList', getList)
 
 
 
