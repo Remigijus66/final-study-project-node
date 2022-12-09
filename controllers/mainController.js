@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const { uid } = require('uid');
-const session = require("express-session");
+// const session = require("express-session");
 
 
 const edatingUserSchema = require("../schemas/edatingUserSchema");
@@ -29,15 +29,18 @@ module.exports = {
         console.log('autologin ===', autologin);
 
         const user = await edatingUserSchema.findOne({ name })
-        if (autologin === true) {
-            console.log('then version')
-        } else {
-            console.log('else version')
-        }
+        // if (autologin === true) {
+        //     console.log('then version')
+        //     console.log('autologin should be true')
+
+        // } else {
+        //     console.log('else version')
+        //     console.log('autologin should be false')
+        // }
         if (!user) return res.send({ error: true, message: "user not found", data: null })
         const correctPassword = await bcrypt.compare(pass, user.pass);
         if (!correctPassword) return res.send({ error: true, message: "incorrect password", data: null })
-        // // console.log('correctPassword ===', correctPassword);
+
         req.session.name = name;
         res.send({ error: false, message: 'session established', data: user })
 
