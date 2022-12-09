@@ -72,6 +72,8 @@ module.exports = {
 
     addLike: async (req, res) => {
         const { author, liked } = req.body
+        const name = req.session.name
+        if (!name) return res.send({ error: true, message: 'you are not logged in', data: null })
         const like = new edatingLikesSchema({ author, liked })
         await like.save()
         res.send({ error: false, message: 'like added', data: null })
@@ -80,6 +82,8 @@ module.exports = {
 
     getList: async (req, res) => {
         const { sex, city, minAge, maxAge, name } = req.body
+        const sesionName = req.session.name
+        if (!sesionName) return res.send({ error: true, message: 'you are not logged in', data: null })
         console.log('name', name);
 
         const users = await edatingUserSchema.aggregate(
@@ -131,7 +135,9 @@ module.exports = {
 
     likedMe: async (req, res) => {
         const { name } = req.body
-
+        const sesionName = req.session.name
+        if (!sesionName) return res.send({ error: true, message: 'you are not logged in', data: null })
+        console.log('likedMe name=', name)
         const users = await edatingLikesSchema.aggregate(
             [
                 {
@@ -154,7 +160,8 @@ module.exports = {
 
     iLiked: async (req, res) => {
         const { name } = req.body
-
+        const sesionName = req.session.name
+        if (!sesionName) return res.send({ error: true, message: 'you are not logged in', data: null })
         const users = await edatingLikesSchema.aggregate(
             [
                 {
@@ -172,7 +179,7 @@ module.exports = {
             ]
         )
         console.log(users)
-        res.send({ error: false, message: 'likedMe', data: users })
+        res.send({ error: false, message: 'iLiked', data: users })
     }
 
 }

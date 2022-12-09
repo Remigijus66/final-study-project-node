@@ -48,7 +48,7 @@ module.exports = io => {
           return object.name === data.to;
         });
         if (index > -1) {
-          io.to(onlineUsers[index].id).emit('like', data.from);
+          io.to(onlineUsers[index].id).emit('like', data);
         }
       })
   })
