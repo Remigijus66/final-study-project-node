@@ -20,17 +20,5 @@ module.exports = {
     },
 
 
-    // validateDiscussion: (req, res, next) => {
-    //     const { title, description } = req.body;
-
-    //     if ((title.trim().length < 1) || (description.trim().length < 1)) return res.send({ error: true, message: "Title and description fields are requirred", data: null })
-    //     next()
-    // },
-    // validateComment: (req, res, next) => {
-    //     const { text, photo, video } = req.body;
-
-    //     if ((text.trim().length < 1) && (photo.trim().length < 1) && (video.trim().length < 1)) return res.send({ error: true, message: "Comment should contain content", data: null })
-    //     next()
-    // },
 }
 

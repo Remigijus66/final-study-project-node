@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { validateRegistration, validateUpdate, validateDiscussion, validateComment, validateAuction } = require("../middleware/validator")
+const { validateRegistration, validateUpdate } = require("../middleware/validator")
 
 const {
     register,
@@ -8,12 +8,13 @@ const {
     autologin,
     logout,
     updateprofile,
-    // createDiscussion,
+    deletePhoto,
     addLike,
     likedMe,
     iLiked,
-    // getComments,
     getList,
+    sendMessage,
+    getMessages
 
 } = require("../controllers/mainController")
 
@@ -22,12 +23,13 @@ router.post('/login', login)
 router.post('/autologin', autologin)
 router.post('/logout', logout)
 router.post('/updateprofile', validateUpdate, updateprofile)
-// router.post('/createDiscussion', validateDiscussion, createDiscussion)
+router.post('/deletePhoto', deletePhoto)
 router.post('/addLike', addLike)
 router.post('/likedMe', likedMe)
 router.post('/iLiked', iLiked)
-// router.post('/getComments', getComments)
 router.post('/getList', getList)
+router.post('/sendMessage', sendMessage)
+router.post('/getMessages', getMessages)
 
 
 

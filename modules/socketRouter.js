@@ -43,13 +43,26 @@ module.exports = io => {
       }),
 
       socket.on('like', (data) => {
-        // console.log('like', data)
+
         const index = onlineUsers.findIndex(object => {
           return object.name === data.to;
         });
         if (index > -1) {
           io.to(onlineUsers[index].id).emit('like', data);
         }
+      }),
+
+      socket.on('message', (data) => {
+
+        const index = onlineUsers.findIndex(object => {
+          return object.name === data.to;
+        });
+        if (index > -1) {
+          io.to(onlineUsers[index].id).emit('messageReceived', data.from);
+        }
+        socket.emit('messageSent', data)
+
       })
+
   })
 }

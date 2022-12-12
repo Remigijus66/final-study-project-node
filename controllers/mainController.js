@@ -1,15 +1,15 @@
 const bcrypt = require("bcrypt");
 const { uid } = require('uid');
-// const session = require("express-session");
+const session = require("express-session");
 
 
 const edatingUserSchema = require("../schemas/edatingUserSchema");
 const edatingLikesSchema = require("../schemas/edatingLikesSchema");
+const edatingMessagesSchema = require("../schemas/edatingMessagesSchema");
 
 
 
 module.exports = {
-
 
     register: async (req, res) => {
         const { name, passOne, sex, age, city } = req.body
@@ -20,8 +20,6 @@ module.exports = {
         res.send({ error: false, message: 'user registered', data: user })
     },
 
-
-
     login: async (req, res) => {
         const { name, pass, autologin } = req.body
         console.log('name ===', name);
@@ -29,14 +27,6 @@ module.exports = {
         console.log('autologin ===', autologin);
 
         const user = await edatingUserSchema.findOne({ name })
-        // if (autologin === true) {
-        //     console.log('then version')
-        //     console.log('autologin should be true')
-
-        // } else {
-        //     console.log('else version')
-        //     console.log('autologin should be false')
-        // }
         if (!user) return res.send({ error: true, message: "user not found", data: null })
         const correctPassword = await bcrypt.compare(pass, user.pass);
         if (!correctPassword) return res.send({ error: true, message: "incorrect password", data: null })
@@ -62,6 +52,7 @@ module.exports = {
         res.send({ message: 'session terminated' })
 
     },
+
     updateprofile: async (req, res) => {
         const { image } = req.body
         const name = req.session.name
@@ -69,6 +60,19 @@ module.exports = {
 
         const user = await edatingUserSchema.findOneAndUpdate({ name }, { $push: { images: image } }, { returnDocument: "after" })
         console.log('updated')
+        res.send({ error: false, message: 'data updated', data: user })
+
+    },
+
+    deletePhoto: async (req, res) => {
+        const { index } = req.body
+        console.log('index', index)
+        const name = req.session.name
+        if (!name) return res.send({ error: true, message: 'you are not logged in', data: null })
+        const oldUser = await edatingUserSchema.findOne({ name });
+        let images = oldUser.images;
+        images.splice(index, 1)
+        const user = await edatingUserSchema.findOneAndUpdate({ name }, { "$set": { "images": images } }, { returnDocument: "after" });
         res.send({ error: false, message: 'data updated', data: user })
 
     },
@@ -81,7 +85,6 @@ module.exports = {
         await like.save()
         res.send({ error: false, message: 'like added', data: null })
     },
-
 
     getList: async (req, res) => {
         const { sex, city, minAge, maxAge, name } = req.body
@@ -183,6 +186,40 @@ module.exports = {
         )
         console.log(users)
         res.send({ error: false, message: 'iLiked', data: users })
+    },
+
+    sendMessage: async (req, res) => {
+        const { from, to, text } = req.body
+        const name = req.session.name
+        if (!name) return res.send({ error: true, message: 'you are not logged in', data: null })
+        const message = new edatingMessagesSchema({ from, to, text })
+        await message.save()
+        res.send({ error: false, message: 'message added', data: null })
+    },
+
+    getMessages: async (req, res) => {
+        const { from, to } = req.body
+        const name = req.session.name
+        if (!name) return res.send({ error: true, message: 'you are not logged in', data: null })
+        const messages = await edatingMessagesSchema.find(
+            {
+                $or: [
+                    {
+                        $and: [
+                            { from: from },
+                            { to: to }
+                        ]
+                    },
+                    {
+                        $and: [
+                            { from: to },
+                            { to: from }
+                        ]
+                    }
+                ]
+            }
+        )
+        res.send({ error: false, message: 'messages', data: messages })
     }
 
 }

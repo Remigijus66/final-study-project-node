@@ -10,10 +10,6 @@ const edatingLikesSchema = new Schema({
     type: String,
     required: true
   },
-  // disliked: {
-  //   type: String,
-  //   required: false
-  // },
 
 })
 
