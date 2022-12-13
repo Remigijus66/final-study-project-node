@@ -52,6 +52,19 @@ module.exports = io => {
         }
       }),
 
+      socket.on('dislike', (data) => {
+        // console.log(' socket from', data.from)
+        // console.log(' socket to', data.to)
+
+        const index = onlineUsers.findIndex(object => {
+          return object.name === data.to;
+        });
+        if (index > -1) {
+          io.to(onlineUsers[index].id).emit('iWasDisliked', data.to);
+        }
+        socket.emit('iDisliked', data.from)
+      }),
+
       socket.on('message', (data) => {
 
         const index = onlineUsers.findIndex(object => {

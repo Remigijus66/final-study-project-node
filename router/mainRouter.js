@@ -10,6 +10,7 @@ const {
     updateprofile,
     deletePhoto,
     addLike,
+    deleteLike,
     likedMe,
     iLiked,
     getList,
@@ -25,6 +26,7 @@ router.post('/logout', logout)
 router.post('/updateprofile', validateUpdate, updateprofile)
 router.post('/deletePhoto', deletePhoto)
 router.post('/addLike', addLike)
+router.post('/deleteLike', deleteLike)
 router.post('/likedMe', likedMe)
 router.post('/iLiked', iLiked)
 router.post('/getList', getList)

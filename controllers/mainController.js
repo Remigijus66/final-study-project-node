@@ -86,6 +86,14 @@ module.exports = {
         res.send({ error: false, message: 'like added', data: null })
     },
 
+    deleteLike: async (req, res) => {
+        const { author, liked } = req.body
+        const name = req.session.name
+        if (!name) return res.send({ error: true, message: 'you are not logged in', data: null })
+        const like = await edatingLikesSchema.findOneAndDelete({ author, liked })
+        res.send({ error: false, message: 'like deleted', data: like })
+    },
+
     getList: async (req, res) => {
         const { sex, city, minAge, maxAge, name } = req.body
         const sesionName = req.session.name
